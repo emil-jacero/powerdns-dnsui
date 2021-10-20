@@ -1,0 +1,36 @@
+FROM php:7-apache
+
+MAINTAINER Emil Larsson <emil@jacero.se>
+
+RUN apt update && \
+    apt -y upgrade && \
+    mkdir -p /usr/share/man/man1 && \
+    mkdir -p /usr/share/man/man7 && \
+    apt -y install msmtp wget postgresql-client libpq-dev zlib1g-dev libicu-dev g++ git && \
+    docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql && \
+    docker-php-ext-configure intl && \
+    docker-php-ext-install mysqli pdo pdo_pgsql pgsql intl && \
+    a2enmod rewrite
+
+ENV DOCKERIZE_VERSION v0.6.1
+RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-armhf-$DOCKERIZE_VERSION.tar.gz && \
+    tar -C /usr/local/bin -xzvf dockerize-linux-armhf-$DOCKERIZE_VERSION.tar.gz && \
+    rm dockerize-linux-armhf-$DOCKERIZE_VERSION.tar.gz
+
+RUN git clone https://github.com/operasoftware/dns-ui.git /var/www/dns-ui && \
+    rm -rf /var/www/html && \
+    ln -s /var/www/dns-ui/public_html /var/www/html
+
+#RUN ln -s /etc/apache2/mods-available/authnz_ldap.load /etc/apache2/mods-enabled/authnz_ldap.load && \
+#    ln -s /etc/apache2/mods-available/ldap.load /etc/apache2/mods-enabled/ldap.load
+
+ADD ./src/config.ini.tmpl ./src/htaccess.tmpl ./src/ssmtp.conf.tmpl ./src/php.ini.tmpl /
+ADD ./src/allow-encoded-slashes.conf /etc/apache2/conf-enabled/
+ADD htpasswd /
+#ADD logo-black.png /var/www/dns-ui/public_html/
+
+EXPOSE 80
+
+CMD dockerize -template /htpasswd:/etc/apache2/.htpasswd -template /php.ini.tmpl:/usr/local/etc/php/php.ini -template /config.ini.tmpl:/var/www/dns-ui/config/config.ini -template /htaccess.tmpl:/var/www/dns-ui/public_html/.htaccess -wait tcp://$DNSUI_PGSQL_HOST:$DNSUI_PGSQL_PORT apache2-foreground
+#CMD dockerize -template /htpasswd:/etc/apache2/.htpasswd -template /ssmtp.conf.tmpl:/etc/ssmtp/ssmtp.conf -template /php.ini.tmpl:/usr/local/etc/php/php.ini -template /config.ini.tmpl:/var/www/dns-ui/config/config.ini -template /htaccess.tmpl:/var/www/dns-ui/public_html/.htaccess -wait tcp://$DNSUI_PGSQL_HOST:$DNSUI_PGSQL_PORT apache2-foreground
+

@@ -1,0 +1,6 @@
+mailhub={{ default .Env.SSMTP_MAILHUB "smtp.zetup.net:25" }}
+hostname={{ default .Env.SSMTP_HOSTNAME "zetup.se" }}
+UseTLS=Yes
+UseSTARTTLS=Yes
+FromLineOverride=yes
+

@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  dn-dnsui:
+    container_name: db-dnsui
+    image: postgres:11
+    restart: always
+    environment:
+      POSTGRES_USER: dnsui
+      POSTGRES_PASSWORD: hGerMoW8GB9srJsN6AKc
+      POSTGRES_DB: dnsui
+    ports:
+      - 5432:5432
+#    volumes:
+#      - db-pdns-auth-master:/var/lib/postgresql/dat
+
+  dnsui:
+    container_name: dnsui
+    image: dnsui:latest
+    restart: always
+    environment:
+      DNSUI_PGSQL_HOST: db-dnsui
+      DNSUI_PGSQL_PORT: 5432
+      DNSUI_PGSQL_DBNAME: dnsui
+      DNSUI_PGSQL_USERNAME: dnsui
+      DNSUI_PGSQL_PASSWORD: hGerMoW8GB9srJsN6AKc
+      DNSUI_PDNS_HOST: 10.10.0.9
+      DNSUI_PDNS_PORT: 8001
+      DNSUI_PDNS_APIKEY: BJR3eAUbwea97d4oqBV4
+      DNSUI_DNS_DNSSEC: 1
+      DNSUI_WEB_BASEURL: "http://nscontrol.larnet.eu"
+#      DNSUI_WEB_LOGO: "/logo-black.png"
+      DNSUI_WEB_FOOTER: "Powerd by Larnet"
+      DNSUI_EMAIL_FROM_ADDRESS: "hostmaster@larnet.eu"
+      DNSUI_EMAIL_REPORT_ADDRESS: "emil@jacero.se"
+    ports:
+      - 80:80
+
