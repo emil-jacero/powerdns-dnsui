@@ -14,8 +14,8 @@ RUN apt update && \
     docker-php-ext-configure intl && \
     docker-php-ext-install pdo pdo_pgsql pgsql intl
 
-RUN curl -LO https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz -o /tmp/dockerize-linux.tar.gz && \
-    tar -C /usr/local/bin -xzvf /tmp/dockerize-linux.tar.gz && \
+RUN mkdir -P /usr/local/bin && curl -LO https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz -o /tmp/dockerize-linux.tar.gz && \
+    tar -xzf /tmp/dockerize-linux.tar.gz -C /usr/local/bin && \
     rm /tmp/dockerize-linux.tar.gz
 
 RUN curl -LO https://github.com/operasoftware/dns-ui/archive/refs/tags/$DNS_UI_VERSION.zip -o /tmp/dns-ui.zip && \
