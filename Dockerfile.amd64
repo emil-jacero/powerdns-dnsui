@@ -9,7 +9,7 @@ RUN apt update && \
     apt -y upgrade && \
     mkdir -p /usr/share/man/man1 && \
     mkdir -p /usr/share/man/man7 && \
-    apt -y install msmtp unzip postgresql-client libpq-dev zlib1g-dev libicu-dev g++ git && \
+    apt -y install msmtp unzip rename postgresql-client libpq-dev zlib1g-dev libicu-dev g++ git && \
     docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql && \
     docker-php-ext-configure intl && \
     docker-php-ext-install pdo pdo_pgsql pgsql intl
