@@ -2,8 +2,8 @@ FROM php:8-apache-buster
 
 LABEL maintainer="emil@jacero.se"
 
-ARG DNS_UI_VERSION=v0.2.7
 ARG DOCKERIZE_VERSION=v0.6.1
+ARG DNS_UI_VERSION=v0.2.7
 
 RUN apt update && \
     apt -y upgrade && \
@@ -14,12 +14,14 @@ RUN apt update && \
     docker-php-ext-configure intl && \
     docker-php-ext-install pdo pdo_pgsql pgsql intl
 
-RUN curl -LO https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-armhf-$DOCKERIZE_VERSION.tar.gz -o /tmp/dockerize-linux.tar.gz && \
-    tar -C /usr/local/bin -xzvf /tmp/dockerize-linux.tar.gz && \
-    rm /tmp/dockerize-linux.tar.gz
+RUN curl -L https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-armhf-$DOCKERIZE_VERSION.tar.gz -o /tmp/dockerize.tar.gz && \
+    tar -xzf /tmp/dockerize.tar.gz -C /usr/local/bin/ && \
+    rm /tmp/dockerize.tar.gz
 
-RUN curl -LO https://github.com/operasoftware/dns-ui/archive/refs/tags/$DNS_UI_VERSION.zip -o /tmp/dns-ui.zip && \
-    unzip /tmp/dns-ui.zip -d /var/www/dns-ui && \
+RUN curl -L https://github.com/operasoftware/dns-ui/archive/refs/tags/$DNS_UI_VERSION.zip -o /tmp/dnsui.zip && \
+    unzip /tmp/dnsui.zip -d /var/www/ && cd /var/www/ && \
+    rm /tmp/dnsui.zip && \
+    rename 's/dns-ui-.*/dns-ui/' /var/www/* && \
     rm -rf /var/www/html && \
     ln -s /var/www/dns-ui/public_html /var/www/html
 

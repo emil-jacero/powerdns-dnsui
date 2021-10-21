@@ -13,6 +13,7 @@ apt install apache2-utils
 ````
 NEW_USER=admin
 htpasswd -n $NEW_USER >> htpasswd
+chown 33:33 htpasswd && chmod 440 htpasswd
 ````
 
 ### Add to htpasswd file
