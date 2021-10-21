@@ -2,21 +2,26 @@ FROM php:8-apache-buster
 
 LABEL maintainer="emil@jacero.se"
 
+ARG DOCKERIZE_VERSION=v0.6.1
+ARG DNS_UI_VERSION=v0.2.7
+
 RUN apt update && \
     apt -y upgrade && \
     mkdir -p /usr/share/man/man1 && \
     mkdir -p /usr/share/man/man7 && \
-    apt -y install msmtp wget postgresql-client libpq-dev zlib1g-dev libicu-dev g++ git && \
+    apt -y install msmtp unzip postgresql-client libpq-dev zlib1g-dev libicu-dev g++ git && \
     docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql && \
     docker-php-ext-configure intl && \
     docker-php-ext-install pdo pdo_pgsql pgsql intl
 
-ENV DOCKERIZE_VERSION v0.6.1
-RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-armhf-$DOCKERIZE_VERSION.tar.gz && \
-    tar -C /usr/local/bin -xzvf dockerize-linux-armhf-$DOCKERIZE_VERSION.tar.gz && \
-    rm dockerize-linux-armhf-$DOCKERIZE_VERSION.tar.gz
+RUN curl -L https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-armhf-$DOCKERIZE_VERSION.tar.gz -o /tmp/dockerize.tar.gz && \
+    tar -xzf /tmp/dockerize.tar.gz -C /usr/local/bin/ && \
+    rm /tmp/dockerize.tar.gz
 
-RUN git clone https://github.com/operasoftware/dns-ui.git /var/www/dns-ui && \
+RUN curl -L https://github.com/operasoftware/dns-ui/archive/refs/tags/$DNS_UI_VERSION.zip -o /tmp/dnsui.zip && \
+    unzip /tmp/dnsui.zip -d /var/www/ && cd /var/www/ && \
+    rm /tmp/dnsui.zip && \
+    rename 's/dns-ui-.*/dns-ui/' /var/www/* && \
     rm -rf /var/www/html && \
     ln -s /var/www/dns-ui/public_html /var/www/html
 
@@ -25,11 +30,10 @@ RUN git clone https://github.com/operasoftware/dns-ui.git /var/www/dns-ui && \
 
 ADD ./src/config.ini.tmpl ./src/htaccess.tmpl ./src/ssmtp.conf.tmpl ./src/php.ini.tmpl /
 ADD ./src/allow-encoded-slashes.conf /etc/apache2/conf-enabled/
-ADD htpasswd /
 #ADD logo-black.png /var/www/dns-ui/public_html/
 
 EXPOSE 80
 
-CMD dockerize -template /htpasswd:/etc/apache2/.htpasswd -template /php.ini.tmpl:/usr/local/etc/php/php.ini -template /config.ini.tmpl:/var/www/dns-ui/config/config.ini -template /htaccess.tmpl:/var/www/dns-ui/public_html/.htaccess -wait tcp://$DNSUI_PGSQL_HOST:$DNSUI_PGSQL_PORT apache2-foreground
+CMD dockerize -template /php.ini.tmpl:/usr/local/etc/php/php.ini -template /config.ini.tmpl:/var/www/dns-ui/config/config.ini -template /htaccess.tmpl:/var/www/dns-ui/public_html/.htaccess -wait tcp://$DNSUI_PGSQL_HOST:$DNSUI_PGSQL_PORT apache2-foreground
 #CMD dockerize -template /htpasswd:/etc/apache2/.htpasswd -template /ssmtp.conf.tmpl:/etc/ssmtp/ssmtp.conf -template /php.ini.tmpl:/usr/local/etc/php/php.ini -template /config.ini.tmpl:/var/www/dns-ui/config/config.ini -template /htaccess.tmpl:/var/www/dns-ui/public_html/.htaccess -wait tcp://$DNSUI_PGSQL_HOST:$DNSUI_PGSQL_PORT apache2-foreground
 
