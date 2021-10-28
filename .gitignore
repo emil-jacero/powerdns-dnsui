@@ -5,3 +5,4 @@ TESTING
 test.py
 .idea
 .DS_Store
+.vscode*

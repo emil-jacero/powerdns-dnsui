@@ -16,9 +16,6 @@ htpasswd -n $NEW_USER >> htpasswd
 chown 33:33 htpasswd && chmod 440 htpasswd
 ````
 
-### Add to htpasswd file
-**Edit file and add the output from the previous command**
-
 
 ## Create user in DB
 ````
